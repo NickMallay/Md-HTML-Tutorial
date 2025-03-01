@@ -227,9 +227,9 @@ def main():
                 # Calculate the relative path from content directory
                 rel_path = os.path.relpath(md_path, content_path)
                 
-                # Convert the output path: change .md to .html and put in public directory
+                # Convert the output path: change .md to .html and put in docs directory
                 output_rel_path = os.path.splitext(rel_path)[0] + ".html"
-                output_path = os.path.join("public", output_rel_path)
+                output_path = os.path.join("docs", output_rel_path)
                 
                 # Create directories if they don't exist
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
