@@ -5,6 +5,7 @@ from block_type import *
 import shutil
 import os
 import re
+import sys
 def text_to_children(text):
     # Clean up spacing between lines
     cleaned_text = " ".join(text.splitlines()).strip()
@@ -169,7 +170,7 @@ def extract_title(markdown):
         
     raise ValueError("No H1 title found in markdown")
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     print(f"Generating page from {from_path} to {dest_path} using {template_path}")
 
     # Read the markdown file
@@ -188,6 +189,11 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(markdown_content)
     final_html = template_content.replace("{{ Title }}", title).replace("{{ Content }}", html_content)
 
+    # Replace absolute paths in href/src with basepath
+    final_html = final_html.replace('href="/', f'href="{basepath}')
+    final_html = final_html.replace('src="/', f'src="{basepath}')
+
+
     # Ensure the destination directory exists
     os.makedirs(os.path.dirname(dest_path), exist_ok=True)
 
@@ -200,8 +206,16 @@ def generate_page(from_path, template_path, dest_path):
 
 
 def main():
-    clear_directory("public")
-    copy_directory("static", "public")
+    # Get base path from command line, default to "/"
+    basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
+
+        # Ensure it ends with "/"
+    if not basepath.endswith("/"):
+        basepath += "/"
+    print(f"Using base path: {basepath}")
+    
+    clear_directory("docs")
+    copy_directory("static", "docs")
     
     content_path = "content"
     for root, dirs, files in os.walk(content_path):
@@ -221,7 +235,7 @@ def main():
                 os.makedirs(os.path.dirname(output_path), exist_ok=True)
                 
                 # Generate the page
-                generate_page(md_path, "template.html", output_path)
+                generate_page(md_path, "template.html", output_path, basepath)
     
     print("Site generation complete!")
 
